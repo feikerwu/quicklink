@@ -23,6 +23,7 @@ const preFetched = {};
  * Examples of features include `prefetch` and `preload`.
  * @param {string} feature - name of the feature to test
  * @return {Boolean} whether the feature is supported
+ * `link.relList是DOMTokenElement的一种，通过supports查看是否支持某种特性`
  */
 function support(feature) {
   const link = document.createElement('link');
@@ -33,6 +34,7 @@ function support(feature) {
  * Fetches a given URL using `<link rel=prefetch>`
  * @param {string} url - the URL to fetch
  * @return {Object} a Promise
+ * `通过link上添加prefetch来实现预加载 在link加载完后resolve`
  */
 function linkPrefetchStrategy(url) {
   return new Promise((resolve, reject) => {
@@ -51,6 +53,7 @@ function linkPrefetchStrategy(url) {
  * Fetches a given URL using XMLHttpRequest
  * @param {string} url - the URL to fetch
  * @return {Object} a Promise
+ * `通过XMLHttpRequest ajax形式来加载`
  */
 function xhrPrefetchStrategy(url) {
   return new Promise((resolve, reject) => {
@@ -71,6 +74,8 @@ function xhrPrefetchStrategy(url) {
  * to XMLHttpRequest if the API is not supported.
  * @param {string} url - the URL to fetch
  * @return {Object} a Promise
+ *
+ * fetch 策略，其中fetch为最高优先级，只有当浏览器不支持fetch实现的时候，才降级为XMLHttpRequest方式请求数据
  */
 function highPriFetchStrategy(url) {
   // TODO: Investigate using preload for high-priority
@@ -95,6 +100,8 @@ const supportedPrefetchStrategy = support('prefetch')
  * @param {Boolean} isPriority - if is "high" priority
  * @param {Object} conn - navigator.connection (internal)
  * @return {Object} a Promise
+ * `在2G低网速或者是在下载东西情况下，不使用预获取`
+ *
  */
 function prefetcher(url, isPriority, conn) {
   if (preFetched[url]) {

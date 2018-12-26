@@ -17,11 +17,13 @@
 import prefetch from './prefetch.mjs';
 import requestIdleCallback from './request-idle-callback.mjs';
 
+// 一个将要预加载的链接集合
 const toPrefetch = new Set();
 
+// 当3要观测的链接进入到当前的窗口时，如果预加载集合中存在该条链接，则去加载
 const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
-    if (entry.isIntersecting) {
+    if (entry.isIntersecting) { // 如果链接和当前窗口相交
       const link = entry.target;
       if (toPrefetch.has(link.href)) {
         observer.unobserve(link);
@@ -75,17 +77,18 @@ export default function (options) {
   options = Object.assign({
     timeout: 2e3,
     priority: false,
-    timeoutFn: requestIdleCallback,
+    timeoutFn: requestIdleCallback, // 默认在浏览器空闲的时候去添加观测，也可以自定义何时去观测，
     el: document,
   }, options);
 
   observer.priority = options.priority;
 
-  const allowed = options.origins || [location.hostname];
-  const ignores = options.ignores || [];
+  const allowed = options.origins || [location.hostname]; // 允许预装载的源, 默认为域名
+  const ignores = options.ignores || []; // 如果链接满足被忽略的条件
 
   options.timeoutFn(() => {
     // If URLs are given, prefetch them.
+    // 如果提供URLs, 强制预获取
     if (options.urls) {
       options.urls.forEach(prefetcher);
     } else {
